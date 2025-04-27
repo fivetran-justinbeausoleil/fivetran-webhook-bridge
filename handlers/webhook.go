@@ -23,5 +23,14 @@ func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Received webhook: EventType=%s, ConnectorID=%s", incomingFivetranEvent.Event, incomingFivetranEvent.ConnectorID)
 
+	outgoingEvent, err := event.TransformFivetranToEventGrid(&incomingFivetranEvent)
+	if err != nil {
+		log.Printf("Failed to transform event: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("Prepared EventGrid event: ID=%s, Type=%s", outgoingEvent.ID, outgoingEvent.EventType)
+
 	w.WriteHeader(http.StatusAccepted)
 }

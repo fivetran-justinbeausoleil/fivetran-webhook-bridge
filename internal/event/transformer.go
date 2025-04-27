@@ -1,12 +1,17 @@
 package event
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/fivetran-justinbeausoleil/fivetran-webhook-bridge/models"
 )
 
 func TransformFivetranToEventGrid(e *FivetranEvent) (models.EventGridEvent, error) {
+	if e.ConnectorID == "" {
+		return models.EventGridEvent{}, fmt.Errorf("missing required field: connector_id")
+	}
+
 	return models.EventGridEvent{
 		ID:              e.SyncID,
 		EventType:       e.Event,

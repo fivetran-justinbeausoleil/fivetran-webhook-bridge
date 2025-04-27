@@ -5,8 +5,6 @@ import (
 	"time"
 )
 
-type EventGridEvents []EventGridEvent
-
 type EventGridEvent struct {
 	ID              string          `json:"id"`
 	EventType       string          `json:"eventType"`
