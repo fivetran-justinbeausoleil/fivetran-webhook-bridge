@@ -7,6 +7,9 @@ import (
 	"github.com/fivetran-justinbeausoleil/fivetran-webhook-bridge/models"
 )
 
+// TransformFivetranToEventGrid maps a FivetranEvent to the Event Grid event schema.
+// It validates required fields and constructs a compatible EventGridEvent for publishing.
+// Returns an error if validation fails.
 func TransformFivetranToEventGrid(e *FivetranEvent) (models.EventGridEvent, error) {
 	if e.ConnectorID == "" {
 		return models.EventGridEvent{}, fmt.Errorf("missing required field: connector_id")

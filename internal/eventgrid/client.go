@@ -4,29 +4,41 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/fivetran-justinbeausoleil/fivetran-webhook-bridge/models"
 	"net/http"
+
+	"github.com/fivetran-justinbeausoleil/fivetran-webhook-bridge/models"
 )
 
-type Config struct {
-	TopicURL string `json:"topic_url"`
-	SASKey   string `json:"sas_key"`
+type Client struct {
+	TopicURL string
+	SASKey   string
 }
 
-// SendEvent posts the Event Grid events to Azure
-func SendEvent(cfg *Config, events []models.EventGridEvent) error {
-	payload, err := json.Marshal(events)
+// NewClient creates a new Event Grid client
+func NewClient(topicURL, sasKey string) *Client {
+	return &Client{
+		TopicURL: topicURL,
+		SASKey:   sasKey,
+	}
+}
+
+func (c *Client) Send(payload any) error {
+	events, ok := payload.([]models.EventGridEvent)
+	if !ok {
+		return fmt.Errorf("invalid payload type for Event Grid sender")
+	}
+	data, err := json.Marshal(events)
 	if err != nil {
 		return fmt.Errorf("failed to marshal events: %w", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, cfg.TopicURL, bytes.NewBuffer(payload))
+	req, err := http.NewRequest(http.MethodPost, c.TopicURL, bytes.NewBuffer(data))
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("aeg-sas-key", cfg.SASKey)
+	req.Header.Set("aeg-sas-key", c.SASKey)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
