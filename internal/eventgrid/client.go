@@ -27,10 +27,13 @@ func (c *Client) Send(payload any) error {
 	if !ok {
 		return fmt.Errorf("invalid payload type for Event Grid sender")
 	}
+
 	data, err := json.Marshal(events)
 	if err != nil {
 		return fmt.Errorf("failed to marshal events: %w", err)
 	}
+
+	fmt.Printf("Payload being sent to Event Grid:\n%s\n", string(data))
 
 	req, err := http.NewRequest(http.MethodPost, c.TopicURL, bytes.NewBuffer(data))
 	if err != nil {
@@ -46,6 +49,8 @@ func (c *Client) Send(payload any) error {
 		return fmt.Errorf("failed to send request: %w", err)
 	}
 	defer resp.Body.Close()
+
+	fmt.Printf("Event Grid Response Status: %s\n", resp.Status)
 
 	if resp.StatusCode >= 300 {
 		return fmt.Errorf("received non-2xx response from Event Grid: %s", resp.Status)

@@ -1,7 +1,7 @@
 package event
 
 import (
-	"fmt"
+	"github.com/google/uuid"
 	"time"
 
 	"github.com/fivetran-justinbeausoleil/fivetran-webhook-bridge/models"
@@ -11,18 +11,24 @@ import (
 // It validates required fields and constructs a compatible EventGridEvent for publishing.
 // Returns an error if validation fails.
 func TransformFivetranToEventGrid(e *FivetranEvent) (models.EventGridEvent, error) {
-	if e.ConnectorID == "" {
-		return models.EventGridEvent{}, fmt.Errorf("missing required field: connector_id")
+	id := e.SyncID
+	if id == "" {
+		id = uuid.New().String() // Generate a random UUID if missing
+	}
+
+	data := e.Data
+	if data == nil {
+		data = []byte("{}") // Empty JSON object if no data
 	}
 
 	return models.EventGridEvent{
-		ID:              e.SyncID,
+		ID:              id,
 		EventType:       e.Event,
 		Subject:         "/fivetran/webhook",
-		EventTime:       time.Now(),
-		Data:            e.Data,
+		EventTime:       time.Now().UTC(),
+		Data:            data,
 		DataVersion:     "1.0",
 		MetadataVersion: "1",
-		Topic:           "", // Event Grid fills in topic when using custom topics
+		Topic:           "",
 	}, nil
 }

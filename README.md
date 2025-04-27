@@ -1,31 +1,128 @@
-**Directory Structure**
+# Fivetran Webhook Bridge
+
+A lightweight Go server that receives Fivetran webhook events, transforms them into Azure Event Grid schema, and publishes them to an Event Grid custom topic.
+
+✅ Built with Go, `net/http`, and clean interfaces  
+✅ Can be exposed using ngrok for local development  
+✅ Supports easy extension to other systems (ServiceNow, Splunk, etc.)
+
+---
+
+## 📚 Project Architecture
+
+```text
+Fivetran Webhook → Webhook Bridge Server → Azure Event Grid
+(optional) via ngrok for HTTPS
 ```
-fivetran-webhook-bridge/
-├── go.mod
-├── main.go
-├── handler/
-│   └── webhook.go         # Handles incoming /webhook endpoint
-├── internal/
-│   ├── config/
-│   │   └── config.go       # Environment variable loading
-│   ├── event/
-│   │   ├── event.go        # Defines FivetranEvent struct (outer envelope)
-│   │   ├── event_data.go   # Defines specific event Data structs + Parse methods
-│   │   └── transformer.go  # Applies business rules to transform events
-│   ├── eventgrid/
-│   │   └── client.go       # Sends events to Azure Event Grid
-│   └── logger/
-│       └── logger.go       # Custom logger wrapper (optional, but clean)
-├── models/
-│   └── eventgrid.go        # Defines EventGridEvent struct (public model)
-└── README.md
+
+- Receives POST events from Fivetran
+- Validates and parses the webhook payload
+- Transforms into Azure Event Grid event schema
+- Posts to Azure Event Grid Topic
+
+---
+
+## 🛠 Tech Stack
+
+- Go 1.21+
+- `net/http`
+- `encoding/json`
+- Azure Event Grid (Destination)
+- ngrok (for local HTTPS exposure)
+
+---
+
+## 🚀 Local Development Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/fivetran-justinbeausoleil/fivetran-webhook-bridge.git
+cd fivetran-webhook-bridge
 ```
-**Visual Flow for Event Grid**
+
+### 2. Install Dependencies
+
+```bash
+go mod tidy
 ```
-flowchart TD
-  A[Fivetran Webhook (POST)] --> B[handler/webhook.go]
-  B --> C[internal/event/event.go (unmarshal Event)]
-  C --> D[internal/event/event_data.go (parse inner Data)]
-  D --> E[internal/event/transformer.go (apply rules)]
-  E --> F[internal/eventgrid/client.go (send to Event Grid)]
+
+### 3. Set Environment Variables
+
+```bash
+export EVENT_GRID_TOPIC_URL=https://<your-event-grid-endpoint>.eventgrid.azure.net/api/events
+export EVENT_GRID_SAS_KEY=<your-event-grid-sas-key>
 ```
+
+### 4. Run Locally
+
+```bash
+make run
+# or
+go run main.go
+```
+
+Server will start at: [http://localhost:8080](http://localhost:8080)
+
+---
+
+## 🌍 Expose Server Using ngrok (for Fivetran Integration)
+
+Since Fivetran requires an HTTPS endpoint:
+
+### 1. Install ngrok
+
+```bash
+brew install ngrok/ngrok/ngrok
+```
+Or download manually from [ngrok.com/download](https://ngrok.com/download)
+
+### 2. Authenticate ngrok
+
+```bash
+ngrok config add-authtoken <your-auth-token>
+```
+
+### 3. Start the Tunnel
+
+```bash
+ngrok http 8080
+```
+
+You will see a forwarding URL like:  
+`https://your-ngrok-id.ngrok-free.app -> http://localhost:8080`
+
+### 4. Configure the Fivetran Webhook Connector
+
+- **Payload URL:** `https://your-ngrok-id.ngrok-free.app/webhook/eventgrid`
+- **Events:** Select desired events (e.g., `sync_start`, `sync_end`)
+- **Secret:** (Optional)
+
+Save and test the webhook!
+
+---
+
+## 📦 Example `curl` Test
+
+```bash
+curl -X POST http://localhost:8080/webhook/eventgrid   -H "Content-Type: application/json"   -d '{
+        "event": "test_event",
+        "created": "2025-04-27T00:00:00Z",
+        "connector_type": "test",
+        "connector_id": "connector_123",
+        "connector_name": "Test Connector",
+        "sync_id": "sync_123",
+        "destination_group_id": "group_123",
+        "data": {
+            "status": "SUCCESSFUL"
+        }
+      }'
+```
+
+---
+
+## 👨‍💻 Maintainers
+
+- Justin Beausoleil | [GitHub](https://github.com/fivetran-justinbeausoleil)
+
+---

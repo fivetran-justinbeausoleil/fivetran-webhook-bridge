@@ -10,7 +10,7 @@ import (
 	"github.com/fivetran-justinbeausoleil/fivetran-webhook-bridge/pkg/eventsender"
 )
 
-// EventGridWebhookHandler returns an HTTP handler for processing incoming Fivetran webhook events.
+// EventGrid returns an HTTP handler for processing incoming Fivetran webhook events.
 // It parses the incoming JSON payload, transforms it into Azure Event Grid format,
 // and sends the resulting event to an Event Grid custom topic.
 // Expects a POST request and returns 202 Accepted on success.
