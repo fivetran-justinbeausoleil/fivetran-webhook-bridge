@@ -7,10 +7,10 @@ import (
 	"github.com/fivetran-justinbeausoleil/fivetran-webhook-bridge/models"
 )
 
-// TransformFivetranToEventGrid maps a FivetranEvent to the Event Grid transformers schema.
+// EventGridTransformer maps a FivetranEvent to the Event Grid transformers schema.
 // It validates required fields and constructs a compatible EventGridEvent for publishing.
 // Returns an error if validation fails.
-func TransformFivetranToEventGrid(e *models.FivetranEvent) (models.EventGridEvent, error) {
+func EventGridTransformer(e *models.FivetranEvent) (models.EventGridEvent, error) {
 	id := e.SyncID
 	if id == "" {
 		id = uuid.New().String() // Generate a random UUID if missing

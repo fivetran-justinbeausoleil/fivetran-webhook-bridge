@@ -50,8 +50,8 @@ go mod tidy
 ### 3. Set Environment Variables
 
 ```bash
-export EVENT_GRID_TOPIC_URL=https://<your-event-grid-endpoint>.eventgrid.azure.net/api/events
-export EVENT_GRID_SAS_KEY=<your-event-grid-sas-key>
+export EVENT_GRID_TOPIC_URL=https://<your-transformers-grid-endpoint>.eventgrid.azure.net/api/events
+export EVENT_GRID_SAS_KEY=<your-transformers-grid-sas-key>
 ```
 
 ### 4. Run Locally
@@ -106,7 +106,7 @@ Save and test the webhook!
 
 ```bash
 curl -X POST http://localhost:8080/webhook/eventgrid   -H "Content-Type: application/json"   -d '{
-        "event": "test_event",
+        "transformers": "test_event",
         "created": "2025-04-27T00:00:00Z",
         "connector_type": "test",
         "connector_id": "connector_123",
