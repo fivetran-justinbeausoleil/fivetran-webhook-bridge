@@ -4,8 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/fivetran-justinbeausoleil/fivetran-webhook-bridge/handlers"
-	"github.com/fivetran-justinbeausoleil/fivetran-webhook-bridge/internal/eventgrid"
+	"github.com/fivetran-justinbeausoleil/fivetran-webhook-bridge/internal/config"
+	"github.com/fivetran-justinbeausoleil/fivetran-webhook-bridge/internal/handlers"
+	"github.com/fivetran-justinbeausoleil/fivetran-webhook-bridge/pkg/eventgrid"
 )
 
 func healthCheck(w http.ResponseWriter, r *http.Request) {
@@ -14,8 +15,8 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	eventGridCfg := eventgrid.LoadConfig()
-	eventGridClient := eventgrid.NewClient(eventGridCfg.TopicURL, eventGridCfg.SASKey)
+	eventGridCfg := config.LoadConfig()
+	eventGridClient := eventgrid.NewClient(eventGridCfg.EventGrid.TopicURL, eventGridCfg.EventGrid.SASKey)
 
 	mux := http.NewServeMux()
 
